@@ -50,9 +50,10 @@ def move():
 	directions = ["up", "down", "left", "right"]
 	move = random.choice(directions)
 	
-	# Shouts are messages sent to all the other snakes in the game.
-	# Shouts are not displayed on the game board.
-	shout = "I am a python snake!"
+	collide = true
+	while(collide = true)
+		move = random.choice(directions)
+		collide = willCollide(move, data)
 	
 	response = {"move": move, "shout": shout}
 	return HTTPResponse(
@@ -79,6 +80,32 @@ def main():
 		port=os.getenv("PORT", "8080"),			debug=os.getenv("DEBUG", True),
 	)
 
+def nextPositionOccupied(move, data):
+	"""
+	checks if next position snake will move is occupied
+	"""
+	myHead = {"x": data["you"]["body"][0]['x'],
+				"y": data["you"]["body"][0]['y']}
+	nextPos = myHead
+	if move = up
+		nextPos["y"] += 1
+	elif move = down
+		nextPos["y"] -= 1
+	elif move = right
+		nextPos = ["x"] += 1
+	elif move = left
+		nextPos = ["x"] -= 1
+	return isOccupied(nextPos, data)
+	
+def isOccupied(nextPos, data):
+	"""
+	checks to see if target space tile
+	first checks walls
+	then checks player 
+	"""
+	
+	
+	
 
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
