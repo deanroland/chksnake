@@ -3,79 +3,84 @@ import os
 import random
 
 import bottle
-from bottle import HTTPResonpse
+from bottle import HTTPResponse
+
 
 @bottle.route("/")
 def index():
 	return "Your Battlesnake is alive!"
 
+
 @bottle.post("/ping")
 def ping():
 	"""
-	Makes sure snake is alive :)
+	Used by the Battlesnake Engine to make sure your snake is still working.
 	"""
 	return HTTPResponse(status=200)
+
 
 @bottle.post("/start")
 def start():
 	"""
-	Called every time a new battlesnake game starts
+	Called every time a new Battlesnake game starts and your snake is in it.
+	Your response will control how your snake is displayed on the board.
 	"""
 	data = bottle.request.json
 	print("START:", json.dumps(data))
-
-	response = {"color": "#F764FD", "headType": "silly", "tailType": "sharp"}
+	
+	response = {"color": "#00FF00", "headType": "regular", "tailType": "regular"}
 	return HTTPResponse(
-		status = 200,
-		headers = {"Content-Type": "application/json"},
-		body = json.dumps(response),
+		status=200,
+		headers={"Content-Type": "application/json"},
+		body=json.dumps(response),
 	)
+
 
 @bottle.post("/move")
 def move():
 	"""
-	Called when snake needs to know next move. 
-	data is dictionary that contains data about board
-	response must include ur move, either "up", "down", "left", or "right"
+	Called when the Battlesnake Engine needs to know your next move.
+	The data parameter will contain information about the board.
+	Your response must include your move of up, down, left, or right.
 	"""
 	data = bottle.request.json
-	print ("MOVE:", json.dumps(data))
-
-	move = spin(data)
-
-	move = "left"
-
-	shout = "yeet"
+	print("MOVE:", json.dumps(data))
+	
+	# Choose a random direction to move in
+	directions = ["up", "down", "left", "right"]
+	move = random.choice(directions)
+	
+	# Shouts are messages sent to all the other snakes in the game.
+	# Shouts are not displayed on the game board.
+	shout = "I am a python snake!"
+	
 	response = {"move": move, "shout": shout}
 	return HTTPResponse(
-		status=200
+		status=200,
 		headers={"Content-Type": "application/json"},
-		body = json.dumps(response)
+		body=json.dumps(response),
 	)
+
 
 @bottle.post("/end")
 def end():
 	"""
-	Called when game with your snake in it ends
+	Called every time a game with your snake in it ends.
 	"""
 	data = bottle.request.json
 	print("END:", json.dumps(data))
 	return HTTPResponse(status=200)
 
-def spin(data)
-	"""
-	returns the move to make snake spin in a circle
-	"""
 
 def main():
 	bottle.run(
-		application
-		host=os.getenv("IP", "0.0.0.0"),	
-		port=os.getenv("PORT", "8080"),
-		debug=os.getenv("DEBUG", TRUE),
+		application,
+		host=os.getenv("IP", "0.0.0.0"),
+		port=os.getenv("PORT", "8080"),			debug=os.getenv("DEBUG", True),
 	)
 
-#Expose WSGI app so gunicorn can find it
+
+# Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
 
 if __name__ == "__main__":
