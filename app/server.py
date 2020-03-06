@@ -54,8 +54,10 @@ def move():
 	leftC = floodFill(0, getNextPosition("left", data),  data, arrayify(data))
 
 	moveC = [upC, downC, rightC, leftC]
+
 	maxValue = max(moveC)
 	index = moveC.index(maxValue)
+
 	if index == 0:
 		move = "up"
 	elif index == 1:
@@ -82,14 +84,6 @@ def end():
 	data = bottle.request.json
 	print("END:", json.dumps(data))
 	return HTTPResponse(status=200)
-
-
-def main():
-	bottle.run(
-		application,
-		host=os.getenv("IP", "0.0.0.0"),
-		port=os.getenv("PORT", "8080"),			debug=os.getenv("DEBUG", True),
-	)
 
 def nextPositionOccupied(move, data):
 	"""
@@ -171,6 +165,14 @@ def arrayify(data):
 	for x in bodys:
 		a[x['x']][x['y']] = True
 	return a
+
+def main():
+	bottle.run(
+		application,
+		host=os.getenv("IP", "0.0.0.0"),
+		port=os.getenv("PORT", "8080"),			debug=os.getenv("DEBUG", True),
+	)
+
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
 
