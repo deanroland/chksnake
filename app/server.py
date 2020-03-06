@@ -55,7 +55,7 @@ def move():
 
 	moveC = [upC, downC, rightC, leftC]
 	moveC.sort()
-	print("movec\n" + str(moveC))
+
 	if moveC[3] == upC:
 		move = "up"
 	elif move[3] == downC:
