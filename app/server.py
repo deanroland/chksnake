@@ -46,17 +46,16 @@ def move():
 	"""
 	data = bottle.request.json
 	print("MOVE:", json.dumps(data))
-	arrayify(data)
-	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WINS
+	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WIN
+	move = "nothing lol"
 	upC = floodFill(0, getNextPosition("up", data), data, arrayify(data))
 	downC = floodFill(0, getNextPosition("down", data), data, arrayify(data))
 	rightC = floodFill(0, getNextPosition("right", data), data, arrayify(data))
 	leftC = floodFill(0, getNextPosition("left", data),  data, arrayify(data))
 
-	print("\n PRINTING FLOODFILLS\n" + str(upC) + " " + str(downC) + " " + str(rightC) + " " + str(leftC))
-
 	moveC = [upC, downC, rightC, leftC]
 	moveC.sort()
+	print("movec\n" + str(moveC))
 	if moveC[3] == upC:
 		move = "up"
 	elif move[3] == downC:
@@ -143,11 +142,11 @@ def floodFill(count, nextPos, data, dataArray):
 	used so snake doesn't run into a corner
 	returns free space
 	"""
-
-	if dataArray[nextPos["x"]][nextPos["y"]] == True:
+	if dataArray[nextPos["x"]][nextPos["y"]] == True or nextPos["x"] == -1 or nextPos["x"] == data["board"]["width"] or nextPos["y"] == -1 or nextPos["y"] == data["board"]["height"]:
 		return count
 	else:
 		dataArray[nextPos['x']][nextPos['y']] = True
+
 	count = count + 1
 	count += floodFill(count, getNextPosition("up", data), data, dataArray)
 	count += floodFill(count, getNextPosition("down", data), data, dataArray)
