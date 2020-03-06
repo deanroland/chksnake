@@ -29,7 +29,7 @@ def start():
 	data = bottle.request.json
 	("START:", json.dumps(data))
 
-	response = {"color": "#00FF00", "headType": "regular", "tailType": "regular"}
+	response = {"color": "#4F1851", "headType": "evil", "tailType": "hook"}
 	return HTTPResponse(
 		status=200,
 		headers={"Content-Type": "application/json"},
