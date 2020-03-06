@@ -1,7 +1,7 @@
 import json
 import os
 import random
-import copy
+import operator
 
 import bottle
 from bottle import HTTPResponse
@@ -54,13 +54,13 @@ def move():
 	leftC = floodFill(0, getNextPosition("left", data),  data, arrayify(data))
 
 	moveC = [upC, downC, rightC, leftC]
-	moveC.sort()
-
-	if moveC[3] == upC:
+	maxValue = max(moveC)
+	index = moveC.index(maxValue)
+	if index == 0:
 		move = "up"
-	elif move[3] == downC:
+	elif index == 1:
 		move = "down"
-	elif move[3] == rightC:
+	elif index == 2:
 		move = "right"
 	else:
 		move = "left"
@@ -142,7 +142,7 @@ def floodFill(count, nextPos, data, dataArray):
 	used so snake doesn't run into a corner
 	returns free space
 	"""
-	if dataArray[nextPos["x"]][nextPos["y"]] == True or nextPos["x"] == -1 or nextPos["x"] == data["board"]["width"] or nextPos["y"] == -1 or nextPos["y"] == data["board"]["height"]:
+	if dataArray[nextPos["x"]][nextPos["y"]] == True or nextPos["x"] == -1 or nextPos["x"] == data["board"]["width"] - 1 or nextPos["y"] == -1 or nextPos["y"] == data["board"]["height"]:
 		return count
 	else:
 		dataArray[nextPos['x']][nextPos['y']] = True
