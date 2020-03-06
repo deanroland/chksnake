@@ -2,10 +2,11 @@ import json
 import os
 import random
 import operator
-
+import sys
 import bottle
 from bottle import HTTPResponse
 
+sys.setrecursionlimit(10**6)
 
 @bottle.route("/")
 def index():
@@ -44,9 +45,10 @@ def move():
 	The data parameter will contain information about the board.
 	Your response must include your move of up, down, left, or right.
 	"""
+	directions = ["up", "down", "left", "right"]
 	data = bottle.request.json
 	print("MOVE:", json.dumps(data))
-	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WIN
+	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WIN. ME SPEEL GOOD
 	move = "nothing lol"
 	upC = floodFill(0, getNextPosition("up", data), data, arrayify(data))
 	downC = floodFill(0, getNextPosition("down", data), data, arrayify(data))
@@ -66,8 +68,14 @@ def move():
 		move = "right"
 	else:
 		move = "left"
-
-
+	print("MOVE BEFORE COLLIDE LOOP\n" + str(move))
+	collide = nextPositionOccupied(move, data)
+	print(str(type(collide)))
+	print("value of COLLIDE\n" + str(collide))
+	while collide == True:
+		move = random.choice(directions)
+		collide = nextPositionOccupied(move, data)
+	print("MOVE AFTER COLLIDE LOOP\n" + str(move))
 	response = {"move": move, "shout": "yeet"}
 	return HTTPResponse(
 		status=200,
@@ -90,7 +98,7 @@ def nextPositionOccupied(move, data):
 	checks if next position snake will move is occupied
 	returns true if next position is occupied
 	"""
-	return isOccupied(getNextPosition(move,data), data),
+	return (isOccupied(getNextPosition(move,data), data))
 
 def getNextPosition(move, data):
 	"""
@@ -136,10 +144,14 @@ def floodFill(count, nextPos, data, dataArray):
 	used so snake doesn't run into a corner
 	returns free space
 	"""
-	if dataArray[nextPos["x"]][nextPos["y"]] == True or nextPos["x"] == -1 or nextPos["x"] == data["board"]["width"] - 1 or nextPos["y"] == -1 or nextPos["y"] == data["board"]["height"]:
+	#this is a very long if statement. id like to formally apologize. please hire me gogole.
+	try:
+		if dataArray[nextPos["x"]][nextPos["y"]] == True or nextPos["x"] == -1 or nextPos["x"] == data["board"]["width"] or nextPos["y"] == -1 or nextPos["y"] == data["board"]["height"]:
+			return count
+		else:
+			dataArray[nextPos['x']][nextPos['y']] = True
+	except IndexError:
 		return count
-	else:
-		dataArray[nextPos['x']][nextPos['y']] = True
 
 	count = count + 1
 	count += floodFill(count, getNextPosition("up", data), data, dataArray)
