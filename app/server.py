@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import copy
 
 import bottle
 from bottle import HTTPResponse
@@ -45,19 +46,27 @@ def move():
 	"""
 	data = bottle.request.json
 	print("MOVE:", json.dumps(data))
+	arrayify(data)
+	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WINS
+	upC = floodFill(0, getNextPosition("up", data), data, arrayify(data))
+	downC = floodFill(0, getNextPosition("down", data), data, arrayify(data))
+	rightC = floodFill(0, getNextPosition("right", data), data, arrayify(data))
+	leftC = floodFill(0, getNextPosition("left", data),  data, arrayify(data))
 
-	# Choose a random direction to move in
-	directions = ["up", "down", "left", "right"]
-	move = random.choice(directions)
+	print("\n PRINTING FLOODFILLS\n" + str(upC) + " " + str(downC) + " " + str(rightC) + " " + str(leftC))
 
-	collide = True
-	while collide == True:
-		move = random.choice(directions)
-		collide = nextPositionOccupied(move, data)
-		if collide == True:
-			directions.remove(move)
-		if len(directions) == 0:
-			break
+	moveC = [upC, downC, rightC, leftC]
+	moveC.sort()
+	if moveC[3] == upC:
+		move = "up"
+	elif move[3] == downC:
+		move = "down"
+	elif move[3] == rightC:
+		move = "right"
+	else:
+		move = "left"
+
+
 	response = {"move": move, "shout": "yeet"}
 	return HTTPResponse(
 		status=200,
@@ -88,6 +97,12 @@ def nextPositionOccupied(move, data):
 	checks if next position snake will move is occupied
 	returns true if next position is occupied
 	"""
+	return isOccupied(getNextPosition(move,data), data),
+
+def getNextPosition(move, data):
+	"""
+	returns next position depending on which inputted
+	"""
 	myHead = {"x": data["you"]["body"][0]['x'],
 				"y": data["you"]["body"][0]['y']}
 	nextPos = myHead
@@ -100,8 +115,8 @@ def nextPositionOccupied(move, data):
 		nextPos["x"] = nextPos["x"] + 1
 	elif move == 'left'	:
 		nextPos["x"] = nextPos["x"] - 1
+	return nextPos
 
-	return isOccupied(nextPos, data)
 
 def isOccupied(nextPos, data):
 	"""
@@ -113,8 +128,6 @@ def isOccupied(nextPos, data):
 	for snake in snakes:
 		for body in snake['body']:
 			bodys.append(body)
-	#copmare nextPos x to x positions in bodys
-
 	for x in bodys:
 		if nextPos['x'] == x['x'] and nextPos['y'] == x['y']:
 			return True
@@ -122,11 +135,45 @@ def isOccupied(nextPos, data):
 			return True
 		if nextPos["y"] == -1 or nextPos["y"] == data["board"]["height"]:
 			return True
-
 	return False
 
+def floodFill(count, nextPos, data, dataArray):
+	"""
+	checks how much room there is if snake does a move
+	used so snake doesn't run into a corner
+	returns free space
+	"""
 
+	print(str(type(dataArray)))
+	if dataArray[nextPos["x"]][nextPos["y"]] == True:
+		return count
+	else:
+		dataArray[nextPos['x']][nextPos['y']] = True
 
+	count = count + 1
+	count =+ floodFill(count, getNextPosition("up", data), data, dataArray)
+	count =+ floodFill(count, getNextPosition("down", data), data, dataArray)
+	count =+ floodFill(count, getNextPosition("right", data), data, dataArray)
+	count =+ floodFill(count, getNextPosition("left", data), data, dataArray)
+
+	return count
+
+def arrayify(data):
+	"""
+	returns state of board as a 2d array. used for floodFill
+	"""
+	n = data["board"]["height"]
+	m = data["board"]["width"]
+	a = [[False] * m for i in range(n)]
+
+	snakes = data["board"]["snakes"]
+	bodys = []
+	for snake in snakes:
+		for body in snake['body']:
+			bodys.append(body)
+	for x in bodys:
+		a[x['x']][x['y']] = True
+	return a
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
 
