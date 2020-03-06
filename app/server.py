@@ -144,17 +144,15 @@ def floodFill(count, nextPos, data, dataArray):
 	returns free space
 	"""
 
-	print(str(type(dataArray)))
 	if dataArray[nextPos["x"]][nextPos["y"]] == True:
 		return count
 	else:
 		dataArray[nextPos['x']][nextPos['y']] = True
-
 	count = count + 1
-	count =+ floodFill(count, getNextPosition("up", data), data, dataArray)
-	count =+ floodFill(count, getNextPosition("down", data), data, dataArray)
-	count =+ floodFill(count, getNextPosition("right", data), data, dataArray)
-	count =+ floodFill(count, getNextPosition("left", data), data, dataArray)
+	count += floodFill(count, getNextPosition("up", data), data, dataArray)
+	count += floodFill(count, getNextPosition("down", data), data, dataArray)
+	count += floodFill(count, getNextPosition("right", data), data, dataArray)
+	count += floodFill(count, getNextPosition("left", data), data, dataArray)
 
 	return count
 
