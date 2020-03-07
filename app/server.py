@@ -3,6 +3,7 @@ import os
 import random
 import operator
 import sys
+import math
 import bottle
 from bottle import HTTPResponse
 
@@ -68,14 +69,14 @@ def move():
 		move = "right"
 	else:
 		move = "left"
-	print("MOVE BEFORE COLLIDE LOOP\n" + str(move))
 	collide = nextPositionOccupied(move, data)
-	print(str(type(collide)))
-	print("value of COLLIDE\n" + str(collide))
+	collideCounter = 0
+	#in case fill messes up, this loop will stop the snake from colliding
 	while collide == True:
-		move = random.choice(directions)
+		move = directions[collideCounter]
+		collideCounter = collideCounter + 1
 		collide = nextPositionOccupied(move, data)
-	print("MOVE AFTER COLLIDE LOOP\n" + str(move))
+
 	response = {"move": move, "shout": "yeet"}
 	return HTTPResponse(
 		status=200,
@@ -175,8 +176,43 @@ def arrayify(data):
 		for body in snake['body']:
 			bodys.append(body)
 	for x in bodys:
-		a[x['x']][x['y']] = True
+		a[x['y']][x['x']] = True
 	return a
+
+def findNearestSnake(pos, data):
+	"""
+	finds closest snake to a position using the position of the snakes head
+	returns the name of the snake in a string
+	"""
+	snakes = data["board"]["snakes"]
+
+	lowestSnakePos = {"x": data["board"]["snakes"]["you"]["body"][0]["x"],
+						"y": data["board"]["snakes"]["you"]["body"][0]["y"]}
+	lowestSnakeName = "you"
+	smallestMagnitude = math.sqrt((pos["x"]-lowestSnakePos["x"])**2 + (pos["y"] - (lowestSnakePos["y"])**2 - pos["y"])**2)
+
+	for snake in snakes:
+		lowestSnakePosSnake = snake["body"][0]
+		magnitude = math.sqrt((pos["x"]-lowestSnakePos["x"])**2 + (pos["y"] - (lowestSnakePos["y"])**2 - pos["y"])**2)
+		if magnitude <= smallestMagnitude:
+			smallestMagnitude = magnitude
+			lowestSnakeName = snake["name"]
+
+	return lowestSnakeName
+
+
+def amIBiggestSnake(data):
+	"""
+	returns true if my snake is longer and false if not ( duh )
+	used to determine if my snake needs to avoid head on collisions
+	if 2 snakes are equal distance from me, largest size will be compared
+	"""
+	myLength = len(data["board"]["snakes"]["you"])
+	snakes = data["board"]["snakes"]
+	for snake in snakes:
+		if len(data["board"]["snakes"][snake]) >= myLength:
+			return False
+	return True
 
 def main():
 	bottle.run(
