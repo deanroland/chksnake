@@ -60,7 +60,7 @@ def move():
 
 	maxValue = max(moveC)
 	index = moveC.index(maxValue)
-
+	print("MOVE C\n" + str(moveC) + "\n")
 	if index == 0:
 		move = "up"
 	elif index == 1:
@@ -147,10 +147,10 @@ def floodFill(count, nextPos, data, dataArray):
 	"""
 	#this is a very long if statement. id like to formally apologize. please hire me gogole.
 	try:
-		if dataArray[nextPos["x"]][nextPos["y"]] == True or nextPos["x"] == -1 or nextPos["x"] == data["board"]["width"] or nextPos["y"] == -1 or nextPos["y"] == data["board"]["height"]:
+		if dataArray[nextPos["y"]][nextPos["x"]] == True:
 			return count
 		else:
-			dataArray[nextPos['x']][nextPos['y']] = True
+			dataArray[nextPos['y']][nextPos['x']] = True
 	except IndexError:
 		return count
 
@@ -178,17 +178,32 @@ def arrayify(data):
 	for x in bodys:
 		a[x['y']][x['x']] = True
 	return a
+def findNearestFruit(data):
+	"""
+	finds nearest fruit to you returns poition of fruit 
+	"""
+	x = data["board"]["snakes"]["you"]["body"][0]["x"]
+	y = data["board"]["snakes"]["you"]["body"][0]["y"]
+    lowest_index = 0
+
+    for i in range(len(foods)-1):
+        if abs(foods[i]["x"]-x)+abs(foods[i]["y"]-y) < abs(foods[lowest_index]["x"]-x)+abs(foods[lowest_index]["y"]-y):
+            lowest_index = i
+
+    pos = {"x": foods[lowest_index]["x"], "y": foods[lowest_index]["y"]}
+
+    return pos
 
 def findNearestSnake(pos, data):
 	"""
 	finds closest snake to a position using the position of the snakes head
-	returns the name of the snake in a string
+	returns the ID of the snake as a string
 	"""
 	snakes = data["board"]["snakes"]
 
 	lowestSnakePos = {"x": data["board"]["snakes"]["you"]["body"][0]["x"],
 						"y": data["board"]["snakes"]["you"]["body"][0]["y"]}
-	lowestSnakeName = "you"
+	lowestSnakeID = data["board"]["snakes"]["you"]["id"]
 	smallestMagnitude = math.sqrt((pos["x"]-lowestSnakePos["x"])**2 + (pos["y"] - (lowestSnakePos["y"])**2 - pos["y"])**2)
 
 	for snake in snakes:
@@ -196,9 +211,9 @@ def findNearestSnake(pos, data):
 		magnitude = math.sqrt((pos["x"]-lowestSnakePos["x"])**2 + (pos["y"] - (lowestSnakePos["y"])**2 - pos["y"])**2)
 		if magnitude <= smallestMagnitude:
 			smallestMagnitude = magnitude
-			lowestSnakeName = snake["name"]
+			lowestSnakeID = snake["id"]
 
-	return lowestSnakeName
+	return lowestSnakeID
 
 
 def amIBiggestSnake(data):
@@ -213,6 +228,7 @@ def amIBiggestSnake(data):
 		if len(data["board"]["snakes"][snake]) >= myLength:
 			return False
 	return True
+
 
 def main():
 	bottle.run(
