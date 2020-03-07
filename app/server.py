@@ -57,18 +57,21 @@ def move():
 	leftC = floodFill(0, getNextPosition("left", data),  data, arrayify(data))
 
 	moveC = [upC, downC, rightC, leftC]
-
-	maxValue = max(moveC)
-	index = moveC.index(maxValue)
-	print("MOVE C\n" + str(moveC) + "\n")
-	if index == 0:
-		move = "up"
-	elif index == 1:
-		move = "down"
-	elif index == 2:
-		move = "right"
+	nearestFruit = findNearestFruit(data)
+	if findNearestSnake(nearestFruit, data) == data["you"]["id"]:
+		goto(moveC, findNearestFruit(data), data)
 	else:
-		move = "left"
+		maxValue = max(moveC)
+		index = moveC.index(maxValue)
+		print("MOVE C\n" + str(moveC) + "\n")
+		if index == 0:
+			move = "up"
+		elif index == 1:
+			move = "down"
+		elif index == 2:
+			move = "right"
+		else:
+			move = "left"
 	collide = nextPositionOccupied(move, data)
 	collideCounter = 0
 	#in case fill messes up, this loop will stop the snake from colliding
@@ -178,21 +181,23 @@ def arrayify(data):
 	for x in bodys:
 		a[x['y']][x['x']] = True
 	return a
+
 def findNearestFruit(data):
 	"""
-	finds nearest fruit to you returns poition of fruit 
+	finds nearest fruit to you returns poition of fruit
 	"""
-	x = data["board"]["snakes"]["you"]["body"][0]["x"]
-	y = data["board"]["snakes"]["you"]["body"][0]["y"]
-    lowest_index = 0
+	foods = data["board"]["food"]
+	x = data["you"]["body"][0]["x"]
+	y = data["you"]["body"][0]["y"]
+	lowestIndex = 0
 
-    for i in range(len(foods)-1):
-        if abs(foods[i]["x"]-x)+abs(foods[i]["y"]-y) < abs(foods[lowest_index]["x"]-x)+abs(foods[lowest_index]["y"]-y):
-            lowest_index = i
+	for i in range(len(foods)-1):
+			if abs(foods[i]["x"]-x)+abs(foods[i]["y"]-y) < abs(foods[lowestIndex]["x"]-x)+abs(foods[lowestIndex]["y"]-y):
+				lowestIndex = i
 
-    pos = {"x": foods[lowest_index]["x"], "y": foods[lowest_index]["y"]}
+	pos = {"x": foods[lowestIndex]["x"], "y": foods[lowestIndex]["y"]}
 
-    return pos
+	return pos
 
 def findNearestSnake(pos, data):
 	"""
@@ -201,9 +206,9 @@ def findNearestSnake(pos, data):
 	"""
 	snakes = data["board"]["snakes"]
 
-	lowestSnakePos = {"x": data["board"]["snakes"]["you"]["body"][0]["x"],
-						"y": data["board"]["snakes"]["you"]["body"][0]["y"]}
-	lowestSnakeID = data["board"]["snakes"]["you"]["id"]
+	lowestSnakePos = {"x": data["you"]["body"][0]["x"],
+						"y": data["you"]["body"][0]["y"]}
+	lowestSnakeID = data["you"]["id"]
 	smallestMagnitude = math.sqrt((pos["x"]-lowestSnakePos["x"])**2 + (pos["y"] - (lowestSnakePos["y"])**2 - pos["y"])**2)
 
 	for snake in snakes:
@@ -222,13 +227,44 @@ def amIBiggestSnake(data):
 	used to determine if my snake needs to avoid head on collisions
 	if 2 snakes are equal distance from me, largest size will be compared
 	"""
-	myLength = len(data["board"]["snakes"]["you"])
+	myLength = len(data["you"]["body"])
 	snakes = data["board"]["snakes"]
 	for snake in snakes:
 		if len(data["board"]["snakes"][snake]) >= myLength:
 			return False
 	return True
 
+def goto(moveC, pos, data):
+	"""
+	sends snake to a position
+	returns move
+	"""
+	snakeHeadX = data["you"]["body"][0]["x"]
+	snakeHeadY = data["you"]["body"][0]["y"]
+	posX = pos["x"]
+	posY = pos["y"]
+	moveX = ""
+	moveY = ""
+	movePotentialX = 0
+	movePotentialY = 0
+
+	if posX > snakeHeadX:
+		moveX = "right"
+		movePotentialX = moveC[2]
+	elif posX < snakeHeadX:
+		moveX = "left"
+		movePotentialX = moveC[3]
+
+	if posY > snakeHeadX:
+		moveY = "down"
+		movePotentialX = moveC[1]
+	elif posY < snakeHeadY:
+		moveY = "up"
+		movePotentialX = moveC[0]
+
+	if movePotentialX > movePotentialY:
+		return moveX
+	return moveY
 
 def main():
 	bottle.run(
