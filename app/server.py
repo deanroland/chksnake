@@ -4,10 +4,12 @@ import random
 import operator
 import sys
 import math
+import pprint
+from pprint import pprint
 import bottle
 from bottle import HTTPResponse
 
-sys.setrecursionlimit(10**6)
+sys.setrecursionlimit(10**9)
 
 @bottle.route("/")
 def index():
@@ -51,35 +53,39 @@ def move():
 	print("MOVE:", json.dumps(data))
 	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WIN. ME SPEEL GOOD
 	move = "nothing lol"
-	upC = floodFill(0, getNextPosition("up", data), data, arrayify(data))
-	downC = floodFill(0, getNextPosition("down", data), data, arrayify(data))
-	rightC = floodFill(0, getNextPosition("right", data), data, arrayify(data))
-	leftC = floodFill(0, getNextPosition("left", data),  data, arrayify(data))
+	upC = floodFill(0, getNextPosition("up", data), data, arrayify("up", data), 0)
+	downC = floodFill(0, getNextPosition("down", data), data, arrayify("down", data), 0)
+	rightC = floodFill(0, getNextPosition("right", data), data, arrayify("right", data), 0)
+	leftC = floodFill(0, getNextPosition("left", data),  data, arrayify("left", data), 0)
 
 	moveC = [upC, downC, rightC, leftC]
+	print(str(moveC))
 	nearestFruit = findNearestFruit(data)
-	if findNearestSnake(nearestFruit, data) == data["you"]["id"]:
-		goto(moveC, findNearestFruit(data), data)
+
+
+	maxValue = max(moveC)
+	index = moveC.index(maxValue)
+	if index == 0:
+		move = "up"
+	elif index == 1:
+		move = "down"
+	elif index == 2:
+		move = "right"
 	else:
-		maxValue = max(moveC)
-		index = moveC.index(maxValue)
-		print("MOVE C\n" + str(moveC) + "\n")
-		if index == 0:
-			move = "up"
-		elif index == 1:
-			move = "down"
-		elif index == 2:
-			move = "right"
-		else:
-			move = "left"
+		move = "left"
+	"""
 	collide = nextPositionOccupied(move, data)
 	collideCounter = 0
 	#in case fill messes up, this loop will stop the snake from colliding
 	while collide == True:
+		print("move forricbly ovverulled")
 		move = directions[collideCounter]
 		collideCounter = collideCounter + 1
+		if collideCounter > 3:
+			break
 		collide = nextPositionOccupied(move, data)
-
+	"""
+	print(move)
 	response = {"move": move, "shout": "yeet"}
 	return HTTPResponse(
 		status=200,
@@ -142,44 +148,50 @@ def isOccupied(nextPos, data):
 			return True
 	return False
 
-def floodFill(count, nextPos, data, dataArray):
+def floodFill(count, pos, data, dataArray, level):
 	"""
 	checks how much room there is if snake does a move
 	used so snake doesn't run into a corner
 	returns free space
 	"""
-	#this is a very long if statement. id like to formally apologize. please hire me gogole.
 	try:
-		if dataArray[nextPos["y"]][nextPos["x"]] == True:
-			return count
+		if dataArray[pos["y"]][pos["x"]] == 1 or level > 6 or pos["x"] not in range (0, data["board"]["height"]) or pos["y"] not in range(0, data["board"]["height"]):
+			return 0
 		else:
-			dataArray[nextPos['y']][nextPos['x']] = True
+			dataArray[pos["y"]][pos["x"]] = 1
 	except IndexError:
+		return 0
+	if pos["y"] >= 0 or pos["x"] >= 0:
+		#pprint(dataArray)
+		count = count + 1
+
+		count += floodFill(0, {"x": pos["x"], "y": pos["y"]-1}, data, dataArray, level + 1)
+		count += floodFill(0, {"x": pos["x"], "y": pos["y"]+1}, data, dataArray, level + 1)
+		count += floodFill(0, {"x": pos["x"]-1, "y": pos["y"]}, data, dataArray, level + 1)
+		count += floodFill(0, {"x": pos["x"]+1, "y": pos["y"]}, data, dataArray, level + 1)
 		return count
+	return 0
 
-	count = count + 1
-	count += floodFill(count, getNextPosition("up", data), data, dataArray)
-	count += floodFill(count, getNextPosition("down", data), data, dataArray)
-	count += floodFill(count, getNextPosition("right", data), data, dataArray)
-	count += floodFill(count, getNextPosition("left", data), data, dataArray)
-
-	return count
-
-def arrayify(data):
+def arrayify(nextMove, data):
 	"""
 	returns state of board as a 2d array. used for floodFill
 	"""
 	n = data["board"]["height"]
 	m = data["board"]["width"]
-	a = [[False] * m for i in range(n)]
+	a = [[0] * m for i in range(n)]
+
+	nextPos = getNextPosition(nextMove,data)
 
 	snakes = data["board"]["snakes"]
 	bodys = []
 	for snake in snakes:
 		for body in snake['body']:
 			bodys.append(body)
+
 	for x in bodys:
-		a[x['y']][x['x']] = True
+		a[x['y']][x['x']] = 1
+
+		#i dont need to do anything with this cuz it gets handled in floodfill
 	return a
 
 def findNearestFruit(data):
