@@ -53,17 +53,20 @@ def move():
 	moveC = [upC, downC, rightC, leftC]
 	print(str(moveC))
 
-	index = moveC.index(max(moveC))
-	if index == 0:
-		move = "up"
-	elif index == 1:
-		move = "down"
-	elif index == 2:
-		move = "right"
-	else:
-		move = "left"
+	goodMoves = []
+	if upC == max(moveC):
+		goodMoves.append("up")
+	if downC == max(moveC):
+		goodMoves.append("down")
+	if leftC == max(moveC):
+		goodMoves.append("left")
+	if rightC == max(moveC):
+		goodMoves.append("right")
+	move = random.choice(goodMoves)
+
 	print("Turn: " + str(data["turn"]))
 	print("Move: " + move)
+
 	response = {"move": move, "shout": "yeet"}
 	return HTTPResponse(
 		status=200,
