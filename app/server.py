@@ -1,7 +1,6 @@
 import json
 import os
 import random
-
 import bottle
 from bottle import HTTPResponse
 
@@ -45,13 +44,23 @@ def move():
 	#print("MOVE:", json.dumps(data))
 	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WIN. ME SPEEL GOOD
 	move = "nothing lol"
-	upC = floodFill(getNextPosition("up", data), data, arrayify("up", data))
-	downC = floodFill(getNextPosition("down", data), data, arrayify("down", data))
-	rightC = floodFill(getNextPosition("right", data), data, arrayify("right", data))
-	leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data))
+
+	upC = floodFill(getNextPosition("up", data), data, arrayify("up", data, not largestSnake(data)))
+	downC = floodFill(getNextPosition("down", data), data, arrayify("down", data, not largestSnake(data)))
+	rightC = floodFill(getNextPosition("right", data), data, arrayify("right", data, not largestSnake(data)))
+	leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data, not largestSnake(data)))
 	moveC = [upC, downC, rightC, leftC]
-	print(str(moveC))
-	print(str(largestSnake(data)))
+	#if moveC cannot find a viable move with ghostheads, it disables them so the snake doesn't kill itself
+	print("moveC before max = " + str(moveC))
+	if max(moveC) == 0:
+		print("ghosthead disabled")
+		upC = floodFill(getNextPosition("up", data), data, arrayify("up", data, False))
+		downC = floodFill(getNextPosition("down", data), data, arrayify("down", data, False))
+		rightC = floodFill(getNextPosition("right", data), data, arrayify("right", data, False))
+		leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data, False))
+		moveC = [upC, downC, rightC, leftC]
+
+	print("movC after if max 0 block: " + str(moveC))
 	goodMoves = []
 	if upC == max(moveC):
 		goodMoves.append("up")
@@ -126,7 +135,7 @@ def floodFill(pos, data, dataArray):
 	return count
 
 
-def arrayify(nextMove, data):
+def arrayify(nextMove, data, ghostHead):
 	"""
 	returns state of board as a 2d array. used for floodFill
 	"""
@@ -144,7 +153,24 @@ def arrayify(nextMove, data):
 
 	for x in bodys:
 		a[x['y']][x['x']] = 1
-
+		for snake in snakes:
+			if snake["id"] != data["you"]["id"] and ghostHead == True:
+				try:
+					a[snake["body"][0]["y"]+1][snake["body"][0]["x"]] = 1
+				except IndexError:
+					ignore = "this"
+				try:
+					a[snake["body"][0]["y"]-1][snake["body"][0]["x"]] = 1
+				except IndexError:
+					ignore = "this"
+				try:
+					a[snake["body"][0]["y"]][snake["body"][0]["x"]+1] = 1
+				except IndexError:
+					ignore = "this"
+				try:
+					a[snake["body"][0]["y"]][snake["body"][0]["x"]-1] = 1
+				except IndexError:
+					ignore = "this"
 	return a
 
 def largestSnake(data):
