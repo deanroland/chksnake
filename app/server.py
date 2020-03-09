@@ -107,7 +107,7 @@ def floodFill(count, pos, data, dataArray, level):
 	returns free space
 	"""
 	try:
-		if dataArray[pos["y"]][pos["x"]] == 1 or level > 6: 
+		if dataArray[pos["y"]][pos["x"]] == 1 or level > 6 or pos["x"] not in range (0, data["board"]["height"]) or pos["y"] not in range(0, data["board"]["height"]):
 			return 0
 		else:
 			dataArray[pos["y"]][pos["x"]] = 1
@@ -119,6 +119,7 @@ def floodFill(count, pos, data, dataArray, level):
 	count += floodFill(0, {"x": pos["x"], "y": pos["y"]+1}, data, dataArray, level + 1)
 	count += floodFill(0, {"x": pos["x"]-1, "y": pos["y"]}, data, dataArray, level + 1)
 	count += floodFill(0, {"x": pos["x"]+1, "y": pos["y"]}, data, dataArray, level + 1)
+
 	return count
 
 
