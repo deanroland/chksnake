@@ -62,8 +62,8 @@ def move():
 		move = "right"
 	else:
 		move = "left"
-
-	print(move)
+	print("Turn: " + str(data["turn"]))
+	print("Move: " + move)
 	response = {"move": move, "shout": "yeet"}
 	return HTTPResponse(
 		status=200,
@@ -107,7 +107,7 @@ def floodFill(count, pos, data, dataArray, level):
 	returns free space
 	"""
 	try:
-		if dataArray[pos["y"]][pos["x"]] == 1 or level > 6 or pos["x"] not in range (0, data["board"]["height"]) or pos["y"] not in range(0, data["board"]["height"]):
+		if dataArray[pos["y"]][pos["x"]] == 1 or level > 6: 
 			return 0
 		else:
 			dataArray[pos["y"]][pos["x"]] = 1
