@@ -49,10 +49,9 @@ def move():
 	downC = floodFill(getNextPosition("down", data), data, arrayify("down", data))
 	rightC = floodFill(getNextPosition("right", data), data, arrayify("right", data))
 	leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data))
-
 	moveC = [upC, downC, rightC, leftC]
 	print(str(moveC))
-
+	print(str(largestSnake(data)))
 	goodMoves = []
 	if upC == max(moveC):
 		goodMoves.append("up")
@@ -148,8 +147,16 @@ def arrayify(nextMove, data):
 
 	return a
 
-
-
+def largestSnake(data):
+	"""
+	returns true if i am largest snake
+	false if otherwise
+	"""
+	myLength = len(data["you"]["body"])
+	for i in data["board"]["snakes"]:
+		if i["id"] != data["you"]["id"] and myLength > len(i["body"]):
+			return True
+	return False
 
 def main():
 	bottle.run(
