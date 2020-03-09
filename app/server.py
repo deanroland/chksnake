@@ -45,10 +45,10 @@ def move():
 	#print("MOVE:", json.dumps(data))
 	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WIN. ME SPEEL GOOD
 	move = "nothing lol"
-	upC = floodFill(getNextPosition("up", data), data, arrayify("up", data), 0)
-	downC = floodFill(getNextPosition("down", data), data, arrayify("down", data), 0)
-	rightC = floodFill(getNextPosition("right", data), data, arrayify("right", data), 0)
-	leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data), 0)
+	upC = floodFill(getNextPosition("up", data), data, arrayify("up", data))
+	downC = floodFill(getNextPosition("down", data), data, arrayify("down", data))
+	rightC = floodFill(getNextPosition("right", data), data, arrayify("right", data))
+	leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data))
 
 	moveC = [upC, downC, rightC, leftC]
 	print(str(moveC))
@@ -100,7 +100,7 @@ def getNextPosition(move, data):
 		nextPos["x"] = nextPos["x"] - 1
 	return nextPos
 
-def floodFill(pos, data, dataArray, level):
+def floodFill(pos, data, dataArray):
 	"""
 	checks how much room there is if snake does a move
 	used so snake doesn't run into a corner
@@ -108,7 +108,7 @@ def floodFill(pos, data, dataArray, level):
 	"""
 	count = 0
 	try:
-		if dataArray[pos["y"]][pos["x"]] == 1 or level > 6 or pos["x"] not in range (0, data["board"]["width"]) or pos["y"] not in range(0, data["board"]["height"]):
+		if dataArray[pos["y"]][pos["x"]] == 1 or pos["x"] not in range (0, data["board"]["width"]) or pos["y"] not in range(0, data["board"]["height"]):
 			return count
 		else:
 			dataArray[pos["y"]][pos["x"]] = 1
@@ -116,10 +116,10 @@ def floodFill(pos, data, dataArray, level):
 		return count
 
 	count += 1
-	count += floodFill({"x": pos["x"], "y": pos["y"]-1}, data, dataArray, level + 1)
-	count += floodFill({"x": pos["x"], "y": pos["y"]+1}, data, dataArray, level + 1)
-	count += floodFill({"x": pos["x"]-1, "y": pos["y"]}, data, dataArray, level + 1)
-	count += floodFill({"x": pos["x"]+1, "y": pos["y"]}, data, dataArray, level + 1)
+	count += floodFill({"x": pos["x"], "y": pos["y"]-1}, data, dataArray)
+	count += floodFill({"x": pos["x"], "y": pos["y"]+1}, data, dataArray)
+	count += floodFill({"x": pos["x"]-1, "y": pos["y"]}, data, dataArray)
+	count += floodFill({"x": pos["x"]+1, "y": pos["y"]}, data, dataArray)
 
 	return count
 
