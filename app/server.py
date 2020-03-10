@@ -51,8 +51,8 @@ def move():
 	leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data, not largestSnake(data)), 0)
 	moveC = [upC, downC, rightC, leftC]
 	#if moveC cannot find a viable move with ghostheads, it disables them so the snake doesn't kill itself
-	if data["you"]["health"] < 30:
-		move = goto(moveC, findFood(data), data)
+
+	move = goto(moveC, findFood(data), data)
 	print("moveC before max = " + str(moveC))
 	if max(moveC) == 0:
 		print("ghosthead disabled")
@@ -123,7 +123,7 @@ def floodFill(pos, data, dataArray, level):
 	"""
 	count = 0
 	try:
-		if dataArray[pos["y"]][pos["x"]] == 1 or pos["x"] not in range (0, data["board"]["width"]) or pos["y"] not in range(0, data["board"]["height"]) or level > 5:
+		if dataArray[pos["y"]][pos["x"]] == 1 or pos["x"] not in range (0, data["board"]["width"]) or pos["y"] not in range(0, data["board"]["height"]) or level > 7:
 			return count
 		else:
 			dataArray[pos["y"]][pos["x"]] = 1
