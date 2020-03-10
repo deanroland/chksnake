@@ -43,7 +43,7 @@ def move():
 	data = bottle.request.json
 	#print("MOVE:", json.dumps(data))
 	# THE BEST MOVE IS CALUCLATED USING A FLOODFILL. HIGHEST AREA WIN. ME SPEEL GOOD
-	move = "nothing lol"
+	move = ""
 
 	upC = floodFill(getNextPosition("up", data), data, arrayify("up", data, not largestSnake(data)))
 	downC = floodFill(getNextPosition("down", data), data, arrayify("down", data, not largestSnake(data)))
@@ -51,6 +51,7 @@ def move():
 	leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data, not largestSnake(data)))
 	moveC = [upC, downC, rightC, leftC]
 	#if moveC cannot find a viable move with ghostheads, it disables them so the snake doesn't kill itself
+
 	print("moveC before max = " + str(moveC))
 	if max(moveC) == 0:
 		print("ghosthead disabled")
@@ -59,18 +60,20 @@ def move():
 		rightC = floodFill(getNextPosition("right", data), data, arrayify("right", data, False))
 		leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data, False))
 		moveC = [upC, downC, rightC, leftC]
-
+	move = goto(moveC, findFood(data), data)
+	print("move after goto: " + move)
 	print("movC after if max 0 block: " + str(moveC))
-	goodMoves = []
-	if upC == max(moveC):
-		goodMoves.append("up")
-	if downC == max(moveC):
-		goodMoves.append("down")
-	if leftC == max(moveC):
-		goodMoves.append("left")
-	if rightC == max(moveC):
-		goodMoves.append("right")
-	move = random.choice(goodMoves)
+	if move == "":
+		goodMoves = []
+		if upC == max(moveC):
+			goodMoves.append("up")
+		if downC == max(moveC):
+			goodMoves.append("down")
+		if leftC == max(moveC):
+			goodMoves.append("left")
+		if rightC == max(moveC):
+			goodMoves.append("right")
+		move = random.choice(goodMoves)
 
 	print("Turn: " + str(data["turn"]))
 	print("Move: " + move)
@@ -183,6 +186,55 @@ def largestSnake(data):
 		if i["id"] != data["you"]["id"] and myLength > len(i["body"]):
 			return True
 	return False
+
+def findFood(data):
+	x = data["you"]["body"][0]["x"]
+	y = data["you"]["body"][0]["y"]
+	food = data["board"]["food"]
+	lowestIndex = 0
+
+	for i in range(len(food)-1):
+		if abs(food[i]["x"]-x)+abs(food[i]["y"]-y) < abs(food[lowestIndex]["x"]-x)+abs(food[lowestIndex]["y"]-y):
+			lowestIndex = i
+
+	pos = {"x": food[lowestIndex]["x"], "y": food[lowestIndex]["y"]}
+	print("Position of nearest food: " + str(pos))
+	return pos
+
+def goto(moveC, pos, data):
+	"""
+	sends snake to position inputted
+	"""
+	myHeadX = data["you"]["body"][0]["x"]
+	myHeadY = data["you"]["body"][0]["y"]
+
+	directionX = pos["x"] - myHeadX
+	directionY = myHeadY - pos["y"]
+	print("directionX : " + str(directionX) + "directiony: " + str(directionY))
+	moveX = ""
+	moveY = ""
+	moveXfill = 0
+	moveYfill = 0
+	if directionX > 0:
+		moveX = "right"
+		moveXfill = moveC[2]
+	elif directionX < 0:
+		moveX = "left"
+		moveXfill = moveC[3]
+	if directionY > 0:
+		moveY = "up"
+		moveYfill = moveC[0]
+	elif directionY < 0:
+		moveY = "down"
+		moveYfill = moveC[1]
+	if moveXfill == 0 and moveYfill == 0 or moveXfill < 15 or moveYfill < 15:
+		print("movexfill and moveyfill " + str(moveXfill) + str(moveYfill))
+		return ""
+	elif moveXfill > moveYfill:
+		return moveX
+	else:
+		return moveY
+
 
 def main():
 	bottle.run(
