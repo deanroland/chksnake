@@ -51,7 +51,8 @@ def move():
 	leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data, not largestSnake(data)))
 	moveC = [upC, downC, rightC, leftC]
 	#if moveC cannot find a viable move with ghostheads, it disables them so the snake doesn't kill itself
-
+	if data["you"]["health"] < 30:
+		move = goto(moveC, findFood(data), data)
 	print("moveC before max = " + str(moveC))
 	if max(moveC) == 0:
 		print("ghosthead disabled")
@@ -60,7 +61,7 @@ def move():
 		rightC = floodFill(getNextPosition("right", data), data, arrayify("right", data, False))
 		leftC = floodFill(getNextPosition("left", data),  data, arrayify("left", data, False))
 		moveC = [upC, downC, rightC, leftC]
-	move = goto(moveC, findFood(data), data)
+
 	print("move after goto: " + move)
 	print("movC after if max 0 block: " + str(moveC))
 	if move == "":
@@ -227,13 +228,15 @@ def goto(moveC, pos, data):
 	elif directionY < 0:
 		moveY = "down"
 		moveYfill = moveC[1]
-	if moveXfill == 0 and moveYfill == 0 or moveXfill < 15 or moveYfill < 15:
-		print("movexfill and moveyfill " + str(moveXfill) + str(moveYfill))
+	if moveXfill == 0 and moveYfill == 0:
 		return ""
-	elif moveXfill > moveYfill:
+	elif moveXfill > moveYfill and moveXfill > 10:
 		return moveX
-	else:
+	elif moveYfill > moveXfill and moveYfill > 10:
 		return moveY
+	else:
+		print("returned nothing. movexfill = " + str(moveXfill) + " and moveYfill = " + str(moveYfill))
+		return ""
 
 
 def main():
